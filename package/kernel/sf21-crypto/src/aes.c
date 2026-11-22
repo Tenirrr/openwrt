@@ -5,9 +5,9 @@
 
 #ifdef CONFIG_CRYPTO_MANAGER_DISABLE_TESTS
 #define SW_FALLBACK_THRES	128
+#endif
 /* requests above this hang the engine (13-bit Tx buffer length fields) */
 #define SF_AES_MAX_LEN		8192
-#endif
 /***
  * Buffer alignment requirements:
  *
@@ -619,7 +619,7 @@ sf_ce_aes_gcm_op(struct aead_request *req, bool is_decrypt)
 			return -ENOMEM;
 
 		reqctx->tmp_buf = tmp_buf;
-		reqctx->tmp_buf_phys = dma_map_single(dev, tmp_buf, ctext_and_tag_len, DMA_FROM_DEVICE);
+		reqctx->tmp_buf_phys = dma_map_single(dev, tmp_buf, ALIGN(ctext_and_tag_len, DMA_RX_ALIGN), DMA_FROM_DEVICE);
 	} else if (req->src == req->dst) {
 		reqctx->dsg_len = reqctx->ssg_len;
 
@@ -1256,7 +1256,7 @@ sf_ce_aes_ccm_op(struct aead_request *req, bool is_decrypt)
 			return -ENOMEM;
 
 		reqctx->tmp_buf = tmp_buf;
-		reqctx->tmp_buf_phys = dma_map_single(dev, tmp_buf, ctext_and_tag_len, DMA_FROM_DEVICE);
+		reqctx->tmp_buf_phys = dma_map_single(dev, tmp_buf, ALIGN(ctext_and_tag_len, DMA_RX_ALIGN), DMA_FROM_DEVICE);
 	} else if (req->src == req->dst) {
 		reqctx->dsg_len = reqctx->ssg_len;
 

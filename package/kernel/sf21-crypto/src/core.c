@@ -205,7 +205,8 @@ static void sf_ce_irq_bh(unsigned long data)
 
 			ret = (rdes3 & CE_RDES3_WB_AEAD_VERIFY) ? 0 : -EBADMSG;
 			if (reqctx->tmp_buf) {
-				dma_unmap_single(dev, reqctx->tmp_buf_phys, ALIGN(is_decrypt ? ptext_len : ctext_and_tag_len, DMA_RX_ALIGN), DMA_FROM_DEVICE);
+				/* same size as mapped in sf_ce_aes_{gcm,ccm}_op() */
+				dma_unmap_single(dev, reqctx->tmp_buf_phys, ALIGN(ctext_and_tag_len, DMA_RX_ALIGN), DMA_FROM_DEVICE);
 				scatterwalk_map_and_copy(reqctx->tmp_buf,
 							 req->dst, req->assoclen, is_decrypt ? ptext_len : ctext_and_tag_len,
 							 1);
@@ -237,7 +238,8 @@ static void sf_ce_irq_bh(unsigned long data)
 
 			ret = (rdes3 & CE_RDES3_WB_AEAD_VERIFY) ? 0 : -EBADMSG;
 			if (reqctx->tmp_buf) {
-				dma_unmap_single(dev, reqctx->tmp_buf_phys, ALIGN(is_decrypt ? ptext_len : ctext_and_tag_len, DMA_RX_ALIGN), DMA_FROM_DEVICE);
+				/* same size as mapped in sf_ce_aes_{gcm,ccm}_op() */
+				dma_unmap_single(dev, reqctx->tmp_buf_phys, ALIGN(ctext_and_tag_len, DMA_RX_ALIGN), DMA_FROM_DEVICE);
 				scatterwalk_map_and_copy(reqctx->tmp_buf,
 							 req->dst, req->assoclen, is_decrypt ? ptext_len : ctext_and_tag_len,
 							 1);
