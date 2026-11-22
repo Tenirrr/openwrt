@@ -186,6 +186,11 @@ int acl_add(struct acl_genl_msg_add *msg)
                 index = priv->iacl_last_index;
         }
 
+        /* the index goes into a TCAM command register field */
+        if (msg->key.policy == SPL_POLICY && msg->spl < SPL_MAX &&
+            msg->spl_index >= ACL_SPL_TB_SZ)
+                return -EINVAL;
+
         /* set offset for host_extract_data when use spec_info */
         acl_set_host_offset(msg);
 
@@ -215,6 +220,12 @@ int acl_add(struct acl_genl_msg_add *msg)
                         ret = acl_write(data, 0);
                         if (ret < 0) {
                                 pr_err("%s table for ipv4 full!\n", msg->is_eacl ? "EACL" : "IACL");
+                                list_del(&data->list);
+                                kfree(data->key);
+                                kfree(data->mask);
+                                kfree(data->key6);
+                                kfree(data->mask6);
+                                kfree(data);
                                 return -ENOSPC;
                         }
                 }
