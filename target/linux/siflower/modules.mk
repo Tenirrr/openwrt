@@ -36,7 +36,7 @@ define KernelPackage/sf21-eth
 	CONFIG_NET_SIFLOWER_ETH_DPNS=n \
 	CONFIG_NET_SIFLOWER_ETH_XGMAC \
 	CONFIG_NET_SIFLOWER_ETH_XPCS
-  DEPENDS:=@TARGET_siflower_sf21 +kmod-sf21-dpns +kmod-phylink
+  DEPENDS:=@TARGET_siflower_sf21 +PACKAGE_kmod-sf21-eth:kmod-sf21-dpns +kmod-phylink
   SUBMENU:=$(NETWORK_DEVICES_MENU)
   FILES:= \
 	$(LINUX_DIR)/drivers/net/ethernet/siflower/sfxpcs.ko \

@@ -50,7 +50,8 @@ function configured_params() {
 		res[name] = p.def;
 
 	for (let line in split(readfile(MODULES_CONF) ?? '', '\n')) {
-		const w = split(trim(line), /[ \t]+/);
+		const hash = index(line, '#');
+		const w = split(trim((hash >= 0) ? substr(line, 0, hash) : line), /[ \t]+/);
 
 		if (length(w) < 3 || w[0] != 'options')
 			continue;
@@ -67,16 +68,39 @@ function configured_params() {
 	return res;
 }
 
+// Drop our parameters from the "options" lines of their modules and keep
+// everything else (other parameters, comments); kmodloader joins all
+// "options" lines of a module.
+function strip_params(line) {
+	const hash = index(line, '#');
+	const comment = (hash >= 0) ? substr(line, hash) : null;
+	const w = split(trim((hash >= 0) ? substr(line, 0, hash) : line), /[ \t]+/);
+
+	if (length(w) < 2 || w[0] != 'options')
+		return line;
+
+	const rest = filter(slice(w, 2), (kv) => {
+		const p = PARAMS[split(kv, '=', 2)[0]];
+		return !(p && p.module == w[1]);
+	});
+
+	if (length(rest) == length(w) - 2)
+		return line;
+
+	if (!length(rest))
+		return comment;
+
+	return join(' ', [ w[0], w[1], ...rest ]) + (comment ? ' ' + comment : '');
+}
+
 function write_params(params) {
 	const keep = [];
 
 	for (let line in split(readfile(MODULES_CONF) ?? '', '\n')) {
-		const w = split(trim(line), /[ \t]+/);
+		line = strip_params(line);
 
-		if (w[0] == 'options' && (w[1] == 'dpnsNat' || w[1] == 'dpnsL2'))
-			continue;
-
-		push(keep, line);
+		if (line != null)
+			push(keep, line);
 	}
 
 	while (length(keep) && keep[-1] == '')
