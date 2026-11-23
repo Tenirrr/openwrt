@@ -11,9 +11,9 @@ PKG_NAME:=sf21-dpns-genl
 PKG_RELEASE:=2
 PKG_LICENSE:=GPL-2.0-only
 
-include $(INCLUDE_DIR)/package.mk
+PKG_BUILD_DEPENDS:=sf21-dpns
 
-DPNS_SRC:=$(TOPDIR)/package/kernel/sf21-dpns/src
+include $(INCLUDE_DIR)/package.mk
 
 define Package/sf21-dpns-genl
   SECTION:=net
@@ -31,25 +31,12 @@ endef
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
 	$(CP) ./src/* $(PKG_BUILD_DIR)/
-	$(CP) $(DPNS_SRC)/dpns_genl/sf_genl.h \
-		$(DPNS_SRC)/dpns_l2/se_common.h \
-		$(DPNS_SRC)/dpns_tmu/sf_tmu_regs.h \
-		$(DPNS_SRC)/dpns_tmu/sf_tmu_genl.h \
-		$(DPNS_SRC)/dpns_mcast/se_mcast_cfg.h \
-		$(DPNS_SRC)/dpns_mcast/sf_genl_mcast.h \
-		$(DPNS_SRC)/dpns_acl/dpns_acl_msg.h \
-		$(DPNS_SRC)/include/sf_genl_msg.h \
-		$(DPNS_SRC)/dpns_nat/dpns_nat_genl.h \
-		$(DPNS_SRC)/dpns_vlan/dpns_vlan_genl.h \
-		$(DPNS_SRC)/dpns_router/dpns_router_genl.h \
-		$(DPNS_SRC)/dpns_common/dpns_common_genl.h \
-		$(PKG_BUILD_DIR)/
 endef
 
 define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		CC="$(TARGET_CC)" \
-		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS) -I$(STAGING_DIR)/usr/include/libnl3 -Wall -Wno-unused-but-set-variable -Wno-unused-function" \
+		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS) -I$(STAGING_DIR)/usr/include/libnl3 -I$(STAGING_DIR)/usr/include/sf21-dpns -Wall -Wno-unused-but-set-variable -Wno-unused-function" \
 		LDFLAGS="$(TARGET_LDFLAGS) -lubus -lubox -lnl-genl-3 -lnl-3"
 endef
 
